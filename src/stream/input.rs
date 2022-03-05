@@ -1,6 +1,6 @@
 use super::super::token::InputToken;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct InputStream {
     data: Vec<InputToken>,
 }

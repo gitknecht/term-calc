@@ -9,14 +9,14 @@ impl WordTokenStream {
     pub fn from(input: &str) -> Option<Self> {
         let mut data = Vec::new();
         match WordTokenStream::tokinize_single(input) {
-            Some(t) => data.push(t),
+            Some(token) => data.push(token),
             None => {
                 let mut part = String::new();
                 for (idx, c) in input.chars().enumerate() {
                     part.push(c);
                     match WordTokenStream::tokinize(&part) {
-                        Some(t) => {
-                            match t {
+                        Some(token) => {
+                            match token {
                                 WordToken::Ein => {
                                     match input.chars().skip(idx+1).next() {
                                         Some(c) => {
@@ -30,7 +30,7 @@ impl WordTokenStream {
                                 }
                                 _ => {}
                             }
-                            data.push(t);
+                            data.push(token);
                             part.clear();
                         }
                         None => {}
@@ -55,7 +55,7 @@ impl WordTokenStream {
             "zu" => Some(WordToken::Close),
             "eins" => Some(WordToken::Number(1)),
             "zwei" => Some(WordToken::Number(2)),
-            "drei" => Some(WordToken::Number(2)),
+            "drei" => Some(WordToken::Number(3)),
             "vier" => Some(WordToken::Number(4)),
             "fünf" => Some(WordToken::Number(5)),
             "sechs" => Some(WordToken::Number(6)),
@@ -107,7 +107,7 @@ impl WordTokenStream {
         self.into_iter()
     }
 
-    pub fn iter_triple(&self) -> TripleIter<WordTokenStream> {
+    pub fn triple_iter(&self) -> TripleIter<WordTokenStream> {
         TripleIter {
             inner: &self,
             len: self.data.len(),

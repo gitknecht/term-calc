@@ -6,6 +6,7 @@ use super::stream::InputStream;
 use super::token::InputToken;
 use super::types::StartEnd;
 
+#[derive(Debug)]
 pub enum Error {
     Dummy,
     ReadInput(io::Error),
@@ -77,6 +78,7 @@ impl convert::From<io::Error> for Error {
     }
 }
 
+#[derive(Debug)]
 pub struct ErrorStruct {
     range: StartEnd,
     msg: String,

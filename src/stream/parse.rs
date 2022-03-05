@@ -1,10 +1,10 @@
 use super::input::InputStream;
-use super::super::token::{ParseToken, InputToken};
+use super::word::WordTokenStream;
+use super::super::token::{ParseToken, InputToken, WordToken};
 use super::super::types::{Operator, StartEnd};
 use super::super::error::{Error};
 use super::super::error::ErrorStruct;
-use super::super::parse_number;
-use super::super::parse_word;
+use super::super::parse::ParseTree;
 
 pub struct ParseStream {
     data: Vec<ParseToken>,
@@ -97,12 +97,20 @@ impl ParseStream {
         self.data.push(token);
     }
 
+    // fn last(&self) -> Option<&ParseToken> {
+    //     if self.data.len() > 0 {
+    //         Some(&self.data[self.data.len() -1])
+    //     } else {
+    //         None
+    //     }
+    // }
+
     fn last(&self) -> Option<&ParseToken> {
-        if self.data.len() > 0 {
-            Some(&self.data[self.data.len() -1])
-        } else {
-            None
-        }
+        self.data.last()
+    }
+
+    pub fn clear(&mut self) {
+        self.data.clear();
     }
 
     fn iter(&self) -> std::slice::Iter<'_, ParseToken> {
@@ -238,5 +246,254 @@ impl std::ops::Index<std::ops::RangeFull> for ParseStream {
 
     fn index(&self, index: std::ops::RangeFull) -> &Self::Output {
         &self.data[index]
+    }
+}
+
+fn parse_word(literal: &str, range: StartEnd) -> Result<ParseToken, String> {
+    let stream = match WordTokenStream::from(literal) {
+        Some(s) => s,
+        None => return Err("unbekanntes Wort".to_string())
+    };
+    if stream.len() == 0 { return Err("unbekanntes Wort".to_string()) }
+    if stream.len() == 1 {
+        match stream[0] {
+            WordToken::Plus => return Ok(ParseToken::Op((Operator::Plus, range))),
+            WordToken::Minus => return Ok(ParseToken::Op((Operator::Minus, range))),
+            WordToken::Multiply => return Ok(ParseToken::Op((Operator::Multiply, range))),
+            WordToken::Divide => return Ok(ParseToken::Op((Operator::Divide, range))),
+            WordToken::Open => return Ok(ParseToken::Open(range)),
+            WordToken::Close => return Ok(ParseToken::Close(range)),
+            WordToken::Number(n) => return Ok(ParseToken::Number((n as i64, range))),
+            _ => return Err("unbekanntes Wort".to_string())
+        }
+    }
+
+    let mut input = ParseStream::new();
+    let iter = stream.triple_iter();
+    for (prev, current, next) in iter {
+        use WordToken::*;
+        
+        match prev {
+            Some(prev_token) => {
+                match current {
+                    Some(token) => {
+                        match token {
+                            Und => {
+                                match prev_token {
+                                    Ein |
+                                    Number(_) => input.push(ParseToken::Op((Operator::Plus, range))),
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Zehn => {
+                                match prev_token {
+                                    Number(n @ 3..=9) => {
+                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                        input.push(ParseToken::Number((10, range)));
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Zig => {
+                                match prev_token {
+                                    Number(n @ 3..=9) => {
+                                        input.push(ParseToken::Op((Operator::Multiply, range)));
+                                        input.push(ParseToken::Number((10, range)));
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            SSig => {
+                                match prev_token {
+                                    Number(3) => {
+                                        input.push(ParseToken::Op((Operator::Multiply, range)));
+                                        input.push(ParseToken::Number((10, range)));
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Hundert => {
+                                match prev_token {
+                                    Ein |
+                                    Number(_) => {
+                                        input.push(ParseToken::Op((Operator::Multiply, range)));
+                                        input.push(ParseToken::Number((100, range)));
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Tausend => {
+                                match prev_token {
+                                    Ein |
+                                    Number(_) |
+                                    Zehn |
+                                    Zwanzig |
+                                    SSig |
+                                    Zig |
+                                    Hundert => {
+                                        let tree = ParseTree::from(&input[..]).unwrap();
+                                        let num = tree.evaluate().unwrap();
+                                        input.clear();
+                                        input.push(ParseToken::Number((num as i64, range)));
+                                        input.push(ParseToken::Op((Operator::Multiply, range)));
+                                        input.push(ParseToken::Number((1000, range)));
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Number(n) => {
+                                match prev_token {
+                                    Hundert |
+                                    Tausend => {
+                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                        input.push(ParseToken::Number((*n as i64, range)));
+                                    }
+                                    Und => {
+                                        match next {
+                                            Some(next_token) => {
+                                                match next_token {
+                                                    SSig => {
+                                                        if *n == 3 {
+                                                            input.push(ParseToken::Number((3, range)))
+                                                        } else {
+                                                            return Err("unbekanntes Wort".to_string())
+                                                        }
+                                                    }
+                                                    Zig => {
+                                                        if *n > 3 {
+                                                            input.push(ParseToken::Number((*n as i64, range)))
+                                                        } else {
+                                                            return Err("unbekanntes Wort".to_string())
+                                                        }
+                                                    }
+                                                    _ => return Err("unbekanntes Wort".to_string())
+                                                }
+                                            }
+                                            None => return Err("unbekanntes Wort".to_string())
+                                        }
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Eins |
+                            Elf |
+                            Zwoelf => {
+                                match prev_token {
+                                    Hundert |
+                                    Tausend => {
+                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                        match token {
+                                            Eins => input.push(ParseToken::Number((1, range))),
+                                            Elf => input.push(ParseToken::Number((11, range))),
+                                            Zwoelf => input.push(ParseToken::Number((12, range))),
+                                            _ => unreachable!()
+                                        }
+                                    }
+                                    _ => return Err("unbekannes Wort".to_string())
+                                }
+                            }
+                            Zwanzig |
+                            Sechzig |
+                            Siebzig => {
+                                match prev_token {
+                                    Hundert |
+                                    Tausend => {
+                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                        match token {
+                                            Zwanzig => input.push(ParseToken::Number((20, range))),
+                                            Sechzig => input.push(ParseToken::Number((60, range))),
+                                            Siebzig => input.push(ParseToken::Number((70, range))),
+                                            _ => unreachable!()
+                                        }
+                                    }
+                                    Und => {
+                                        match token {
+                                            Zwanzig => input.push(ParseToken::Number((20, range))),
+                                            Sechzig => input.push(ParseToken::Number((60, range))),
+                                            Siebzig => input.push(ParseToken::Number((70, range))),
+                                            _ => unreachable!()
+                                        }
+                                    }
+                                    _ => return Err("unbekannes Wort".to_string())
+                                }
+                            }
+                            Ein => {
+                                match prev_token {
+                                    Hundert => {
+                                        match next {
+                                            Some(next_token) => {
+                                                match next_token {
+                                                    Und |
+                                                    Tausend => {
+                                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                                        input.push(ParseToken::Number((1, range)));
+                                                    }
+                                                    _ => return Err("unbekanntes Wort".to_string())
+                                                }
+                                            }
+                                            None => return Err("unbekanntes Wort".to_string())
+                                        }
+                                    }
+                                    Tausend => {
+                                        match next {
+                                            Some(next_token) => {
+                                                match next_token {
+                                                    Hundert |
+                                                    Und => {
+                                                        input.push(ParseToken::Op((Operator::Plus, range)));
+                                                        input.push(ParseToken::Number((1, range)));
+                                                    }
+                                                    _ => return Err("unbekanntes Wort".to_string())
+                                                }
+                                            }
+                                            None => return Err("unbekanntes Wort".to_string())
+                                        }
+                                    }
+                                    _ => return Err("unbekanntes Wort".to_string())
+                                }
+                            }
+                            Plus |
+                            Minus |
+                            Multiply |
+                            Divide |
+                            Open |
+                            Close => return Err("unbekanntes Wort".to_string())
+                        }
+                    }
+                    None => unreachable!()
+                }
+            }
+            None => {
+                match current {
+                    Some(token) => {
+                        match token {
+                            Number(n) => input.push(ParseToken::Number((*n as i64, range))),
+                            Ein => input.push(ParseToken::Number((1, range))),
+                            Zehn => input.push(ParseToken::Number((10, range))),
+                            Zwanzig => input.push(ParseToken::Number((20, range))),
+                            Sechzig => input.push(ParseToken::Number((60, range))),
+                            Siebzig => input.push(ParseToken::Number((70, range))),
+                            _ => return Err("unbekanntes Wort".to_string())
+                        }
+                    }
+                    None => unreachable!()
+                }
+            }
+        }
+    }
+
+    match ParseTree::from(&input[..]) {
+        Ok(tree) => {
+            let num = tree.evaluate()?;
+            Ok(ParseToken::Number((num as i64, range)))
+        }
+        Err(_) => panic!("Expected Ok value")
+    }
+}
+
+fn parse_number(literal: &str, range: StartEnd) -> Result<ParseToken, String> {
+    match literal.parse::<u64>() {
+        Ok(n) => Ok(ParseToken::Number((n as i64, range))),
+        Err(e) => Err("konnte Zahl nicht parsen".to_string())
     }
 }
