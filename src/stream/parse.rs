@@ -178,9 +178,28 @@ impl ParseStream {
                     }
                 }
                 Open(range) => {
+                    if idx > 0 {
+                        match self[idx -1] {
+                            Op(_) => {}
+                            Open(_) => {}
+                            _ => error_vec.push(ErrorStruct::new(*range, "Klammer hier nicht möglich".to_string()))
+                        }
+                    }
                     match self.find_close(idx) {
                         Some(_) => {}
                         None => error_vec.push(ErrorStruct::new(*range, "Schließende Klammer fehlt".to_string()))
+                    }
+                }
+                Close(range) => {
+                    if idx == 0 {
+                        error_vec.push(ErrorStruct::new(*range, "Schließende Klammer hier nicht möglich".to_string()))
+                    }
+                    else if idx > 0 {
+                        match self[idx -1] {
+                            Close(_) => {}
+                            Number(_) => {}
+                            _ => error_vec.push(ErrorStruct::new(*range, "Schließende Klammer hier nicht möglich".to_string()))
+                        }
                     }
                 }
                 _ => {}        
