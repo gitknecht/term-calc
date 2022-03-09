@@ -40,7 +40,8 @@ impl fmt::Display for Error {
                 msg.push('\r');
                 for err in errors {
                     for _ in 0..8 {
-                        msg.push(char::from_u32(0x204E).unwrap());
+                        // msg.push(char::from_u32(0x204E).unwrap());
+                        msg.push('-');
                     }
                     msg.push(' ');
                     msg.push_str(input.as_str());
