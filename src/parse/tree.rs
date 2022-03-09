@@ -25,11 +25,24 @@ impl ParseTree {
         if len == 2 {
             match stream[0] {
                 Op((Operator::Minus, _)) => {}
-                _ => panic!("Invalid prefix operator")
+                // _ => panic!("Invalid prefix operator")
+                _ => return Err(Error::ParseTree("Invalid prefix operator".to_string()))
             }
             match stream[1] {
                 Number((n, _)) => return Ok(Self::Number(-n as f64)),
-                _ => return return Err(Error::ParseTree("Expect number variant".to_string()))
+                _ => return Err(Error::ParseTree("Expect number variant".to_string()))
+            }
+        }
+
+        if len == 3 {
+            match stream[0] {
+                Open(_) => {
+                    match stream[1] {
+                        Number((n, _)) => return Ok(Self::Number(n as f64)),
+                        _ => return Err(Error::ParseTree("Expect number variant".to_string()))
+                    }
+                }
+                _ => {}
             }
         }
         

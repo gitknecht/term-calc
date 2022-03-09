@@ -54,7 +54,7 @@ use std::fmt;
 fn main() {
     println!("");
     println!("");
-    println!("Einfacher Komandozeilenrechner v0.1.2 bereit!");
+    println!("Einfacher Komandozeilenrechner v0.1.3 bereit!");
     println!("Um das Programm zu beenden \"end\" eingeben.");
     println!("Um die Hilfe anzuzeigen \"help\" eingeben");
     println!("");
