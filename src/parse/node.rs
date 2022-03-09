@@ -14,7 +14,7 @@ pub struct ParseNode {
 
 impl ParseNode {
 
-    fn find_close_idx(stream: &[ParseToken], skip: usize) -> Option<usize> {
+    pub fn find_close_idx(stream: &[ParseToken], skip: usize) -> Option<usize> {
         use ParseToken::*;
 
         let mut count = 0;

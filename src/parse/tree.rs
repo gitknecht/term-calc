@@ -14,52 +14,36 @@ impl ParseTree {
         
         let len = stream.len();
         if len == 0 { return Ok(Self::Number(0f64)) }
-
-        if len == 1 {
-            match stream[0] {
-                Number((n, _)) => return Ok(Self::Number(n as f64)),
-                _ => return Err(Error::ParseTree("Expect number variant".to_string()))
-            }
-        }
-
-        if len == 2 {
-            match stream[0] {
-                Op((Operator::Minus, _)) => {}
-                // _ => panic!("Invalid prefix operator")
-                _ => return Err(Error::ParseTree("Invalid prefix operator".to_string()))
-            }
-            match stream[1] {
-                Number((n, _)) => return Ok(Self::Number(-n as f64)),
-                _ => return Err(Error::ParseTree("Expect number variant".to_string()))
-            }
-        }
-
-        if len == 3 {
-            match stream[0] {
-                Open(_) => {
-                    match stream[1] {
+        else {
+            match len {
+                1 => {
+                    match stream[0] {
                         Number((n, _)) => return Ok(Self::Number(n as f64)),
+                        _ => return Err(Error::ParseTree("Expect nubmer variant".to_string()))
+                    }
+                }
+                2 => {
+                    match stream[0] {
+                        Op((Operator::Minus, _)) => {}
+                        _ => return Err(Error::ParseTree("Invalid prefix operator".to_string()))
+                    }
+                    match stream[1] {
+                        Number((n, _)) => return Ok(Self::Number(-n as f64)),
                         _ => return Err(Error::ParseTree("Expect number variant".to_string()))
                     }
                 }
-                _ => {}
-            }
-        }
-
-        if len == 4 {
-            match stream[0] {
-                Open(_) => {
-                    match stream[1] {
-                        Op((Operator::Minus, _)) => {
-                            match stream[2] {
-                                Number((n, _)) => return Ok(Self::Number(-n as f64)),
-                                _ => return Err(Error::ParseTree("Expect number variant".to_string()))
+                _ => {
+                    match stream[0] {
+                        Open(_) => {
+                            if let Some(close_idx) = ParseNode::find_close_idx(&stream, 0) {
+                                if close_idx == len -1 {
+                                    return Self::from(&stream[1..len-1])
+                                }
                             }
                         }
-                        _ => return Err(Error::ParseTree("Expect operator minus token".to_string()))
+                        _ => {}
                     }
                 }
-                _ => {}
             }
         }
         
