@@ -12,6 +12,7 @@
 //! * `"1 + (1 - 5)"` oder 
 //! * `"eins plus auf eins minus fünf zu"` oder 
 //! * `"eins + auf 1 - fünf)"` oder
+//! * `"eintausendfünfhundertdreiundsiebzig mal (-34 plus 3 mal sechshunderteinundvierzig) durch acht"` oder
 //! * `"eins plus (minus drei mal 6) durch 2 minus (drei mal 4)"`.
 //! 
 //! Gültige Zeichen:

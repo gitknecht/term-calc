@@ -17,6 +17,11 @@ fn rdm_3() {
 }
 #[test]
 fn rdm_4() {
+    let res = calculate("eintausendfünfhundertdreiundsiebzig mal (-34 plus 3 mal sechshunderteinundvierzig) durch acht").unwrap();
+    assert_eq!(371_424.625f64, res.0);
+}
+#[test]
+fn rdm_5() {
     let res = calculate("eins plus (minus drei mal 6) durch 2 minus (drei mal 4)").unwrap();
     assert_eq!(-20f64, res.0);
 }
