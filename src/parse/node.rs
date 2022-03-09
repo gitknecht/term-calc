@@ -80,11 +80,10 @@ impl ParseNode {
 
         match stream[0] {
             Open(_) => {
-                match stream[len-1] {
-                    Close(_) => {
+                if let Some(close_idx) = Self::find_close_idx(&stream, 0) {
+                    if close_idx == len-1 {
                         return Self::from(&stream[1..len-1])
                     }
-                    _ => {}
                 }
             }
             _ => {}

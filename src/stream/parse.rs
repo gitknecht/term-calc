@@ -173,7 +173,7 @@ impl ParseStream {
                     }
                 }
                 Open(range) => {
-                    match self.find_close(idx+1) {
+                    match self.find_close(idx) {
                         Some(_) => {}
                         None => error_vec.push(ErrorStruct::new(*range, "Schließende Klammer fehlt".to_string()))
                     }
@@ -190,9 +190,16 @@ impl ParseStream {
     }
     
     fn find_close(&self, skip: usize) -> Option<()> {
+        let mut open_count = 0;
         for token in self.iter().skip(skip) {
             match token {
-                ParseToken::Close(_) => return Some(()),
+                ParseToken::Open(_) => open_count += 1,
+                ParseToken::Close(_) => {
+                    open_count -= 1;
+                    if open_count == 0 {
+                        return Some(())
+                    }
+                }
                 _ => {}
             }
         }              
