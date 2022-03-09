@@ -1,7 +1,7 @@
 //! # A simple command line calculator
 //! Ein einfacher Komandozeilenrechner welcher vier grundlegende Rechenoperationen
 //! `Addition`, `Subtraktion`, `Multiplikation` und `Division` zur Verfügung stellt.
-//! Intern wird mit [`f64`] gerechnet und bei der Ausgabe auf max 4 Stellen gerundet, 
+//! Intern wird mit [`f64`] gerechnet und bei der Ausgabe auf 8 Stellen hinter dem Kommer gerundet, 
 //! somit ist dieses Programm mehr als Spielzeug als ein echter Rechner zu betrachten.
 //! Es werden jedoch die Vorrangsregeln von Punkt- und Strichrechnung beachtet sowie 
 //! der Vorrang von Klammerausdrücken.
@@ -11,7 +11,8 @@
 //! Wort eingegeben werden. Es kann dabei auch beliebig gemischt werden, z.B.:
 //! * `"1 + (1 - 5)"` oder 
 //! * `"eins plus auf eins minus fünf zu"` oder 
-//! * `"eins + auf 1 - fünf)"`.
+//! * `"eins + auf 1 - fünf)"` oder
+//! * `"eins plus (minus drei mal 6) durch 2 minus (drei mal 4)"`.
 //! 
 //! Gültige Zeichen:
 //! * `1` bis `0`
@@ -29,7 +30,7 @@
 //! * `durch`
 //! * `auf`
 //! * `zu`
-//! * und fast alle ausgeschriebenen Zahlen z.B.: `einhundert` oder 
+//! * und viele ausgeschriebenen Zahlen z.B.: `einhundert` oder 
 //! * `eintausenddreihundertfünf` usw.. 
 
 #![allow(dead_code)]

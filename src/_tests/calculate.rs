@@ -1,6 +1,27 @@
 use crate::calculate;
 
 #[test]
+fn rdm_1() {
+    let res = calculate("1 + (1 - 5)").unwrap();
+    assert_eq!(-3f64, res.0);
+}
+#[test]
+fn rdm_2() {
+    let res = calculate("eins plus auf eins minus fünf zu").unwrap();
+    assert_eq!(-3f64, res.0);
+}
+#[test]
+fn rdm_3() {
+    let res = calculate("eins + auf 1 - fünf)").unwrap();
+    assert_eq!(-3f64, res.0);
+}
+#[test]
+fn rdm_4() {
+    let res = calculate("eins plus (minus drei mal 6) durch 2 minus (drei mal 4)").unwrap();
+    assert_eq!(-20f64, res.0);
+}
+
+#[test]
 fn t1() {
     let res = calculate("1").unwrap();
     assert_eq!(1f64, res.0);
