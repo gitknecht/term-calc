@@ -83,10 +83,9 @@ impl ParseTree {
     
     pub fn print(&self) -> String {
         match self {
-            // Self::Number(n) => return format!("{}", n),
             Self::Number(n) => {
                 if *n < 0f64 {
-                    return format!("({})", n)
+                    return format!("(0{})", n)
                 } else {
                     return format!("{}", n)
                 }
