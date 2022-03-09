@@ -49,7 +49,6 @@ impl ParseNode {
                     match Self::find_close_idx(&stream, 2) {
                         Some(idx) => {
                             if idx != len -1 {
-                                println!("token found is {:?}", &stream[idx+1]);
                                 some_op2 = match &stream[idx+1] {
                                     Op((op, _)) => Some((*op, idx+1)),
                                     _ => panic!("Expected operator token after close paren") 

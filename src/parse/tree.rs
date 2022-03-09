@@ -45,6 +45,23 @@ impl ParseTree {
                 _ => {}
             }
         }
+
+        if len == 4 {
+            match stream[0] {
+                Open(_) => {
+                    match stream[1] {
+                        Op((Operator::Minus, _)) => {
+                            match stream[2] {
+                                Number((n, _)) => return Ok(Self::Number(-n as f64)),
+                                _ => return Err(Error::ParseTree("Expect number variant".to_string()))
+                            }
+                        }
+                        _ => return Err(Error::ParseTree("Expect operator minus token".to_string()))
+                    }
+                }
+                _ => {}
+            }
+        }
         
         match ParseNode::from(&stream) {
             Ok(node) => return Ok(Self::Node(Box::new(node))),
@@ -66,7 +83,14 @@ impl ParseTree {
     
     pub fn print(&self) -> String {
         match self {
-            Self::Number(n) => return format!("{}", n),
+            // Self::Number(n) => return format!("{}", n),
+            Self::Number(n) => {
+                if *n < 0f64 {
+                    return format!("({})", n)
+                } else {
+                    return format!("{}", n)
+                }
+            }
             Self::Node(node) => return format!("{}", node.print()),
         }
     }

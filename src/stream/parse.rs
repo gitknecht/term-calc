@@ -159,6 +159,11 @@ impl ParseStream {
                                 error_vec.push(ErrorStruct::new(*range, "Operator hier nicht möglich".to_string()))
                             }
                             else if idx +1 < self.data.len() {
+                                match self[idx -1] {
+                                    Number(_) => {}
+                                    Close(_) => {}
+                                    _ => error_vec.push(ErrorStruct::new(*range, "Operator hier nicht möglich".to_string()))
+                                }
                                 match self[idx +1] {
                                     Number(_) => {}
                                     Open(_) => {}
