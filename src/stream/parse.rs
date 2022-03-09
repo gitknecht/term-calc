@@ -159,6 +159,11 @@ impl ParseStream {
                                 error_vec.push(ErrorStruct::new(*range, "Operator hier nicht möglich".to_string()))
                             }
                             else if idx +1 < self.data.len() {
+                                match self[idx -1] {
+                                    Number(_) => {}
+                                    Close(_) => {}
+                                    _ => error_vec.push(ErrorStruct::new(*range, "Operator hier nicht möglich".to_string()))
+                                }
                                 match self[idx +1] {
                                     Number(_) => {}
                                     Open(_) => {}
@@ -173,7 +178,7 @@ impl ParseStream {
                     }
                 }
                 Open(range) => {
-                    match self.find_close(idx+1) {
+                    match self.find_close(idx) {
                         Some(_) => {}
                         None => error_vec.push(ErrorStruct::new(*range, "Schließende Klammer fehlt".to_string()))
                     }
@@ -190,9 +195,16 @@ impl ParseStream {
     }
     
     fn find_close(&self, skip: usize) -> Option<()> {
+        let mut open_count = 0;
         for token in self.iter().skip(skip) {
             match token {
-                ParseToken::Close(_) => return Some(()),
+                ParseToken::Open(_) => open_count += 1,
+                ParseToken::Close(_) => {
+                    open_count -= 1;
+                    if open_count == 0 {
+                        return Some(())
+                    }
+                }
                 _ => {}
             }
         }              
