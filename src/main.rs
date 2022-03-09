@@ -79,19 +79,28 @@ fn main() {
                 print_help();
                 continue
             }
+            "Was ist die Antwort auf alles?" => {
+                let res = calculate("42");
+                print_output(res);
+                continue
+            }
             _ => {}
         }
         
-        match calculate(input.as_str()) {
-            Ok((output, input)) => {
-                println!("Eingabe: {}", input);
-                println!("Ausgabe: {:.8}", output);
-            }
-            Err(e) => println!("{}", e)
-        }
-        
-        println!("");
+        let res =  calculate(input.as_str());
+        print_output(res);
     }
+}
+
+fn print_output(res: Result<(f64, String), Error>) {
+    match res {
+        Ok((output, input)) => {
+            println!("Eingabe: {}", input);
+            println!("Ausgabe: {:.8}", output);
+        }
+        Err(e) => println!("{}", e)
+    }
+    println!("");
 }
 
 fn print_help() {
@@ -110,6 +119,8 @@ fn print_help() {
     println!("");
     println!("Die Zahlen können auch ausgeschrieben werden:");
     println!("  z.B.: \"einhundertfünf\" für 105");
+    println!("");
+    println!("Du kannst auch nach der Antwort auf alles fragen :-)");
     println!("");
     println!("");
 }
