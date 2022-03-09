@@ -51,10 +51,12 @@ use types::{Operator, StartEnd};
 use std::io;
 use std::fmt;
 
+const PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn main() {
     println!("");
     println!("");
-    println!("Einfacher Komandozeilenrechner v0.1.0 bereit!");
+    println!("Einfacher Komandozeilenrechner {} bereit!", PKG_VERSION);
     println!("Um das Programm zu beenden \"end\" eingeben.");
     println!("Um die Hilfe anzuzeigen \"help\" eingeben");
     println!("");
@@ -74,23 +76,7 @@ fn main() {
         match input.as_str() {
             "end" => break,
             "help" => {
-                println!("Hilfe:");
-                println!("Verfügbare Rechenoperationen:");
-                println!("  Addition");
-                println!("  Subtraktion");
-                println!("  Maltiplikation");
-                println!("  Division");
-                println!("");
-                println!("Die Operatoren können auch ausgeschrieben werden:");
-                println!("  \"plus\" für Addition");
-                println!("  \"minus\" für Subtraktion");
-                println!("  \"mal\" für Multiplikation");
-                println!("  \"durch\" für Division");
-                println!("");
-                println!("Die Zahlen können auch ausgeschrieben werden:");
-                println!("  z.B.: \"einhundertfünf\" für 105");
-                println!("");
-                println!("");
+                print_help();
                 continue
             }
             _ => {}
@@ -106,6 +92,26 @@ fn main() {
         
         println!("");
     }
+}
+
+fn print_help() {
+    println!("Hilfe:");
+    println!("Verfügbare Rechenoperationen:");
+    println!("  Addition");
+    println!("  Subtraktion");
+    println!("  Maltiplikation");
+    println!("  Division");
+    println!("");
+    println!("Die Operatoren können auch ausgeschrieben werden:");
+    println!("  \"plus\" für Addition");
+    println!("  \"minus\" für Subtraktion");
+    println!("  \"mal\" für Multiplikation");
+    println!("  \"durch\" für Division");
+    println!("");
+    println!("Die Zahlen können auch ausgeschrieben werden:");
+    println!("  z.B.: \"einhundertfünf\" für 105");
+    println!("");
+    println!("");
 }
 
 fn read_input(input: &mut impl io::BufRead) -> Result<String, Error> {
