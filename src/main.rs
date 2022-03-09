@@ -154,3 +154,7 @@ fn calculate(input: &str) -> Result<(f64, String), Error> {
         Err(e) => unimplemented!()
     }
 }
+
+#[cfg(test)]
+#[path = "_tests/calculate.rs"]
+mod calculate;
